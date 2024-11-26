@@ -19,19 +19,20 @@ public class ShopApp {
                 addProduct(stmt, "Tim Tam", new BigDecimal("2.20"), 300, "Australia", new BigDecimal("45"), "Chocolate", "Biscuits");
                 addProduct(stmt, "Reese's Peanut Butter Cups", new BigDecimal("1.00"), 250, "USA", new BigDecimal("40"), "Peanut Butter", "Chocolate");
                 addProduct(stmt, "Choco Pie", new BigDecimal("1.30"), 180, "South Korea", new BigDecimal("35"), "Marshmallow", "Cake");
-                addProduct(stmt, "Digestive", new BigDecimal("1.00"), 120, "United Kingdom", new BigDecimal("70"), "Plain", "Biscuits");
-                addProduct(stmt, "Oreos", new BigDecimal("1.50"), 500, "USA", new BigDecimal("154"), "Vanilla", "Cookies");
-                addProduct(stmt, "Ferrero Rocher", new BigDecimal("3.00"), 80, "Italy", new BigDecimal("38"), "Hazelnut", "Chocolate");
-                addProduct(stmt, "Haribo Gummy Bears", new BigDecimal("0.99"), 600, "Germany", new BigDecimal("100"), "Fruit", "Gummy Candy");
-                addProduct(stmt, "Toblerone", new BigDecimal("2.50"), 120, "Switzerland", new BigDecimal("100"), "Honey and Almond Nougat", "Chocolate");
-                addProduct(stmt, "Lindt Excellence", new BigDecimal("3.50"), 90, "Switzerland", new BigDecimal("100"), "Dark Chocolate", "Chocolate Bar");
-                addProduct(stmt, "Milka", new BigDecimal("1.70"), 200, "Germany", new BigDecimal("100"), "Milk Chocolate", "Chocolate Bar");
-                addProduct(stmt, "Skittles", new BigDecimal("1.20"), 400, "USA", new BigDecimal("50"), "Fruit", "Candy");
-                addProduct(stmt, "Mars Bar", new BigDecimal("1.50"), 350, "United Kingdom", new BigDecimal("51"), "Caramel", "Chocolate Bar");
-                addProduct(stmt, "Twix", new BigDecimal("1.80"), 220, "USA", new BigDecimal("50"), "Caramel", "Chocolate Bar");
-                addProduct(stmt, "Cadbury Dairy Milk", new BigDecimal("2.00"), 300, "United Kingdom", new BigDecimal("95"), "Milk Chocolate", "Chocolate Bar");
-                addProduct(stmt, "Pepero", new BigDecimal("1.40"), 250, "South Korea", new BigDecimal("47"), "Chocolate", "Biscuit Sticks");
-                addProduct(stmt, "Matcha KitKat", new BigDecimal("2.50"), 100, "Japan", new BigDecimal("45"), "Matcha", "Chocolate Bar");
+                addProduct(stmt, "Digestive Biscuits", new BigDecimal("1.00"), 120, "United Kingdom", new BigDecimal("70"), "Whole Wheat", "Biscuits");
+                addProduct(stmt, "Tunnock's Caramel Wafer", new BigDecimal("1.20"), 150, "Scotland", new BigDecimal("55"), "Caramel", "Wafers");
+                addProduct(stmt, "Macaron", new BigDecimal("3.00"), 80, "France", new BigDecimal("15"), "Various", "Pastry");
+                addProduct(stmt, "Haw Flakes", new BigDecimal("0.50"), 300, "China", new BigDecimal("30"), "Sweet & Sour", "Fruit Candy");
+                addProduct(stmt, "Baklava", new BigDecimal("2.50"), 100, "Turkey", new BigDecimal("35"), "Honey & Nuts", "Pastry");
+                addProduct(stmt, "Bounty Bar", new BigDecimal("1.50"), 200, "UK", new BigDecimal("57"), "Coconut", "Chocolate Bar");
+                addProduct(stmt, "Mochi", new BigDecimal("2.00"), 90, "Japan", new BigDecimal("45"), "Red Bean", "Rice Cake");
+                addProduct(stmt, "Lotus Biscoff", new BigDecimal("0.70"), 150, "Belgium", new BigDecimal("25"), "Cinnamon", "Biscuits");
+                addProduct(stmt, "Ritter Sport", new BigDecimal("2.20"), 110, "Germany", new BigDecimal("100"), "Hazelnut", "Chocolate");
+                addProduct(stmt, "Alfajores", new BigDecimal("2.00"), 130, "Argentina", new BigDecimal("60"), "Dulce de Leche", "Cookies");
+                addProduct(stmt, "Jelly Babies", new BigDecimal("1.00"), 170, "United Kingdom", new BigDecimal("80"), "Fruit", "Gummies");
+                addProduct(stmt, "Salted Egg Yolk Chips", new BigDecimal("3.50"), 90, "Singapore", new BigDecimal("100"), "Salted Egg Yolk", "Chips");
+                addProduct(stmt, "Speculoos Cookie Butter", new BigDecimal("3.00"), 140, "Belgium", new BigDecimal("200"), "Spiced", "Spread");
+                addProduct(stmt, "Churros", new BigDecimal("1.80"), 160, "Spain", new BigDecimal("50"), "Cinnamon & Sugar", "Pastry");
 
                 // Execute batch insert
                 stmt.executeBatch();
