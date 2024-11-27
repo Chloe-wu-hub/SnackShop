@@ -44,6 +44,8 @@ public class ShopApp {
                 updateProduct(conn, 1, 5);
                 // Example usage: Delete product with ID 2
                 deleteProduct(conn, 2);
+                // Example usage: Get product by ID
+                getProductById(conn, 1);
                 
             } else {
                 System.out.println("Failed to connect to the database.");
@@ -114,4 +116,33 @@ public class ShopApp {
             }
         }
     }
+    private static void getProductById(Connection conn, int productId) throws SQLException {
+        String query = "SELECT * FROM products WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, productId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String name = rs.getString("name");
+                    BigDecimal price = rs.getBigDecimal("price");
+                    int quantity = rs.getInt("quantity");
+                    String countryOfOrigin = rs.getString("country_of_origin");
+                    BigDecimal weight = rs.getBigDecimal("weight_g");
+                    String flavor = rs.getString("flavor");
+                    String category = rs.getString("category");
+
+                    System.out.println("Product ID: " + productId);
+                    System.out.println("Name: " + name);
+                    System.out.println("Price: " + price);
+                    System.out.println("Quantity: " + quantity);
+                    System.out.println("Country of Origin: " + countryOfOrigin);
+                    System.out.println("Weight (g): " + weight);
+                    System.out.println("Flavor: " + flavor);
+                    System.out.println("Category: " + category);
+                } else {
+                    System.out.println("Product with ID " + productId + " not found.");
+                }
+            }
+        }
+    }
 }
+
