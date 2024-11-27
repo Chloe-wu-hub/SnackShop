@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.math.RoundingMode;
+import java.util.Collections;
+
 
 public class ShopApp {
     public static void main(String[] args) {
@@ -144,5 +146,55 @@ public class ShopApp {
             }
         }
     }
+    public static void searchProductsByKeywords(String keywords) {
+        // 检查是否有输入关键词
+        if (keywords == null || keywords.trim().isEmpty()) {
+            System.out.println("Please provide valid keywords.");
+            return;
+        }
+
+        String[] keywordArray = keywords.trim().split("\\s+"); // 按空格拆分为数组，忽略多余的空格
+        StringBuilder queryBuilder = new StringBuilder("SELECT * FROM products WHERE ");
+
+        // 动态生成 SQL 查询条件
+        String conditions = String.join(" OR ", Collections.nCopies(keywordArray.length, "(name LIKE ? OR description LIKE ?)"));
+        queryBuilder.append(conditions);
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(queryBuilder.toString())) {
+
+            // 设置每个关键词的参数
+            int paramIndex = 1;
+            for (String keyword : keywordArray) {
+                String wildcardKeyword = "%" + keyword + "%"; // 模糊匹配，添加通配符 %
+                stmt.setString(paramIndex++, wildcardKeyword); // 用于 name 字段
+                stmt.setString(paramIndex++, wildcardKeyword); // 用于 description 字段
+            }
+
+            // 执行查询
+            try (ResultSet rs = stmt.executeQuery()) {
+                // 输出结果
+                boolean found = false;
+                while (rs.next()) {
+                    found = true;
+                    System.out.println("ID: " + rs.getInt("id"));
+                    System.out.println("Name: " + rs.getString("name"));
+                    System.out.println("Price: $" + rs.getBigDecimal("price"));
+                    System.out.println("Quantity: " + rs.getInt("quantity"));
+                    System.out.println("Country of Origin: " + rs.getString("country_of_origin"));
+                    System.out.println("Weight (g): " + rs.getBigDecimal("weight_g"));
+                    System.out.println("Flavor: " + rs.getString("flavor"));
+                    System.out.println("Category: " + rs.getString("category"));
+                    System.out.println("------------------------------");
+                }
+                if (!found) {
+                    System.out.println("No products found matching the keywords: " + keywords);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
+
 
