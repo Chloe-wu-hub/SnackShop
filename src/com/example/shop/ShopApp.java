@@ -56,8 +56,9 @@ public class ShopApp {
             e.printStackTrace();
         }
     }
-
+ // 确保 addProduct 方法独立于 main 方法，并且放在类的同一级别
     private static void addProduct(PreparedStatement stmt, String name, BigDecimal price, int quantity, String countryOfOrigin, BigDecimal weight, String flavor, String category) throws SQLException {
+        System.out.println("Attempting to add product: " + name);  // 打印正在添加的商品名称
         stmt.setString(1, name);
         stmt.setBigDecimal(2, price);
         stmt.setInt(3, quantity);
@@ -66,6 +67,7 @@ public class ShopApp {
         stmt.setString(6, flavor);
         stmt.setString(7, category);
         stmt.addBatch();
+        System.out.println("Product added to batch: " + name);  // 打印已加入批量操作
     }
 
     private static void updateProduct(Connection conn, int productId, int newQuantity) throws SQLException {
@@ -193,8 +195,8 @@ public class ShopApp {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            System.out.println("Error during batch insert.");
         }
     }
 }
-
 
