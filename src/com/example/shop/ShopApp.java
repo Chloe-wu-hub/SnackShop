@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.math.RoundingMode;
 
 public class ShopApp {
     public static void main(String[] args) {
@@ -38,6 +40,11 @@ public class ShopApp {
                 // Execute batch insert
                 stmt.executeBatch();
                 System.out.println("Products added successfully.");
+                // Example usage: Update product with ID 1 to have a new quantity of 5
+                updateProduct(conn, 1, 5);
+                // Example usage: Delete product with ID 2
+                deleteProduct(conn, 2);
+                
             } else {
                 System.out.println("Failed to connect to the database.");
             }
@@ -55,5 +62,56 @@ public class ShopApp {
         stmt.setString(6, flavor);
         stmt.setString(7, category);
         stmt.addBatch();
+    }
+
+    private static void updateProduct(Connection conn, int productId, int newQuantity) throws SQLException {
+        if (newQuantity < 1 || newQuantity > 10) {
+            System.out.println("Quantity must be between 1 and 10.");
+            return;
+        }
+
+        String selectQuery = "SELECT quantity, price FROM products WHERE id = ?";
+        try (PreparedStatement selectStmt = conn.prepareStatement(selectQuery)) {
+            selectStmt.setInt(1, productId);
+            try (ResultSet rs = selectStmt.executeQuery()) {
+                if (rs.next()) {
+                    int currentQuantity = rs.getInt("quantity");
+                    BigDecimal currentPrice = rs.getBigDecimal("price");
+
+                    if (currentQuantity == 0) {
+                        System.out.println("Current quantity is zero, cannot update price proportionally.");
+                        return;
+                    }
+              
+                 // 计算单价
+                 BigDecimal unitPrice = currentPrice.divide(new BigDecimal(currentQuantity), 2, RoundingMode.HALF_UP);
+                 // 计算新价格
+                 BigDecimal newPrice = unitPrice.multiply(new BigDecimal(newQuantity));
+
+                    String updateQuery = "UPDATE products SET quantity = ?, price = ? WHERE id = ?";
+                    try (PreparedStatement updateStmt = conn.prepareStatement(updateQuery)) {
+                        updateStmt.setInt(1, newQuantity);
+                        updateStmt.setBigDecimal(2, newPrice);
+                        updateStmt.setInt(3, productId);
+                        updateStmt.executeUpdate();
+                        System.out.println("Product ID " + productId + " updated successfully with new quantity: " + newQuantity + " and new price: " + newPrice);
+                    }
+                } else {
+                    System.out.println("Product with ID " + productId + " not found.");
+                }
+            }
+        }
+    }
+    private static void deleteProduct(Connection conn, int productId) throws SQLException {
+        String deleteQuery = "DELETE FROM products WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(deleteQuery)) {
+            stmt.setInt(1, productId);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Product ID " + productId + " deleted successfully.");
+            } else {
+                System.out.println("Product with ID " + productId + " not found.");
+            }
+        }
     }
 }
