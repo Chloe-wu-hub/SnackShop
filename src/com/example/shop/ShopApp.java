@@ -3,10 +3,12 @@ package com.example.shop;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.math.RoundingMode;
 import java.util.Collections;
+import java.util.Map;
 
 
 public class ShopApp {
@@ -45,7 +47,10 @@ public class ShopApp {
                 System.out.println("Products added successfully.");
                 // Example usage: Update product with ID 1 to have a new quantity of 5
                 updateProduct(conn, 1, 5);
-
+             // 删除删除操作的调用，或者替换为其他产品ID
+             // deleteProduct(conn, 2);  // 不需要删除ID为2的产品
+                // 删除后刷新并显示所有产品
+                showProducts(conn);  // 显示所有产品，验证 ID 为 2 的产品是否被删除
                 // Example usage: Get product by ID
                 getProductById(conn, 1);
                 
@@ -53,7 +58,8 @@ public class ShopApp {
                 System.out.println("Failed to connect to the database.");
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+        	System.out.println("Error during delete operation: " + e.getMessage());
+            System.out.println("Transaction rolled back.");
         }
     }
  // 确保 addProduct 方法独立于 main 方法，并且放在类的同一级别
@@ -108,18 +114,64 @@ public class ShopApp {
             }
         }
     }
+ // 显示所有产品的方法
+    private static void showProducts(Connection conn) throws SQLException {
+        String query = "SELECT * FROM products";
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            boolean hasProducts = false;  // 增加检查是否有产品
+            while (rs.next()) {
+                hasProducts = true;
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                double price = rs.getDouble("price");
+                System.out.println("Product ID: " + id + ", Name: " + name + ", Price: " + price);
+            }
+            if (!hasProducts) {
+                System.out.println("No products found.");
+            }
+        }
+    }
+
     private static void deleteProduct(Connection conn, int productId) throws SQLException {
+        if (conn == null || conn.isClosed()) {
+            System.out.println("Connection is invalid or closed.");
+            return;
+        }
+
+     // 确认产品是否存在
+        String checkExistQuery = "SELECT id FROM products WHERE id = ?";
+        try (PreparedStatement checkStmt = conn.prepareStatement(checkExistQuery)) {
+            checkStmt.setInt(1, productId);
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (!rs.next()) {
+                    System.out.println("Product with ID " + productId + " not found.");
+                    return;  // 如果没有找到产品，则退出
+                }
+            }
+        }
+
+        // 如果产品存在，执行删除操作
         String deleteQuery = "DELETE FROM products WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(deleteQuery)) {
             stmt.setInt(1, productId);
             int rowsAffected = stmt.executeUpdate();
+
             if (rowsAffected > 0) {
                 System.out.println("Product ID " + productId + " deleted successfully.");
+                conn.commit();  // 删除后显式提交事务
+                System.out.println("Transaction committed.");
             } else {
-                System.out.println("Product with ID " + productId + " not found.");
+                System.out.println("No rows were deleted. Product with ID " + productId + " might not exist.");
             }
+        } catch (SQLException e) {
+            System.out.println("Error during delete operation: " + e.getMessage());
+            conn.rollback();  // 如果出现异常，回滚事务
+            System.out.println("Transaction rolled back.");
         }
     }
+
+
     private static void getProductById(Connection conn, int productId) throws SQLException {
         String query = "SELECT * FROM products WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -198,5 +250,140 @@ public class ShopApp {
             System.out.println("Error during batch insert.");
         }
     }
+    public static void createOrder(Connection conn, int customerId, Map<Integer, Integer> productQuantities) {
+        try {
+            // 计算订单的总价格
+            BigDecimal totalPrice = BigDecimal.ZERO;
+            for (Map.Entry<Integer, Integer> entry : productQuantities.entrySet()) {
+                int productId = entry.getKey();
+                int quantity = entry.getValue();
+
+                // 获取产品的单价
+                String productQuery = "SELECT price FROM products WHERE id = ?";
+                try (PreparedStatement productStmt = conn.prepareStatement(productQuery)) {
+                    productStmt.setInt(1, productId);
+                    try (ResultSet rs = productStmt.executeQuery()) {
+                        if (rs.next()) {
+                            BigDecimal price = rs.getBigDecimal("price");
+                            totalPrice = totalPrice.add(price.multiply(new BigDecimal(quantity)));
+                        }
+                    }
+                }
+            }
+
+            // 插入订单
+            String insertOrderQuery = "INSERT INTO orders (customer_id, total_price, status) VALUES (?, ?, 'PENDING')";
+            try (PreparedStatement orderStmt = conn.prepareStatement(insertOrderQuery, Statement.RETURN_GENERATED_KEYS)) {
+                orderStmt.setInt(1, customerId);
+                orderStmt.setBigDecimal(2, totalPrice);
+                orderStmt.executeUpdate();
+
+                // 获取生成的订单 ID
+                ResultSet generatedKeys = orderStmt.getGeneratedKeys();
+                int orderId = -1;
+                if (generatedKeys.next()) {
+                    orderId = generatedKeys.getInt(1);
+                }
+
+                // 插入订单项
+                for (Map.Entry<Integer, Integer> entry : productQuantities.entrySet()) {
+                    String insertOrderItemQuery = "INSERT INTO order_items (order_id, product_id, quantity) VALUES (?, ?, ?)";
+                    try (PreparedStatement itemStmt = conn.prepareStatement(insertOrderItemQuery)) {
+                        itemStmt.setInt(1, orderId);
+                        itemStmt.setInt(2, entry.getKey());
+                        itemStmt.setInt(3, entry.getValue());
+                        itemStmt.executeUpdate();
+                    }
+                }
+
+                System.out.println("Order created successfully with Order ID: " + orderId);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void updateOrderStatus(Connection conn, int orderId, String newStatus) {
+        // 确认订单状态是有效的
+        if (newStatus == null || newStatus.trim().isEmpty()) {
+            System.out.println("Invalid status provided.");
+            return;
+        }
+
+        // 定义支持的状态
+        String[] validStatuses = {"PENDING", "CONFIRMED", "SHIPPED", "DELIVERED"};
+        boolean isValidStatus = false;
+        for (String status : validStatuses) {
+            if (status.equalsIgnoreCase(newStatus)) {
+                isValidStatus = true;
+                break;
+            }
+        }
+
+        if (!isValidStatus) {
+            System.out.println("Invalid order status: " + newStatus);
+            return;
+        }
+
+        // 更新订单状态
+        String updateQuery = "UPDATE orders SET status = ? WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+            stmt.setString(1, newStatus);
+            stmt.setInt(2, orderId);
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Order " + orderId + " status updated to " + newStatus);
+            } else {
+                System.out.println("Order with ID " + orderId + " not found or status is already " + newStatus);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error updating order status: " + e.getMessage());
+        }
+    }
+    public static void generateInvoice(Connection conn, int orderId) {
+        try {
+            // 获取订单总金额
+            String orderQuery = "SELECT total_price FROM orders WHERE id = ?";
+            BigDecimal totalAmount = BigDecimal.ZERO;
+
+            try (PreparedStatement orderStmt = conn.prepareStatement(orderQuery)) {
+                orderStmt.setInt(1, orderId);
+                try (ResultSet rs = orderStmt.executeQuery()) {
+                    if (rs.next()) {
+                        totalAmount = rs.getBigDecimal("total_price");
+                    } else {
+                        System.out.println("Order ID " + orderId + " not found.");
+                        return;
+                    }
+                }
+            }
+
+            // 生成发票号 (可以使用UUID或自定义规则)
+            String invoiceNumber = "INV-" + System.currentTimeMillis(); // 使用时间戳生成简单发票号
+
+            // 将发票信息插入到 invoices 表中
+            String insertInvoiceQuery = "INSERT INTO invoices (order_id, invoice_number, total_amount) VALUES (?, ?, ?)";
+            try (PreparedStatement stmt = conn.prepareStatement(insertInvoiceQuery)) {
+                stmt.setInt(1, orderId);
+                stmt.setString(2, invoiceNumber);
+                stmt.setBigDecimal(3, totalAmount);
+                stmt.executeUpdate();
+                System.out.println("Invoice generated successfully for Order ID: " + orderId);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error generating invoice: " + e.getMessage());
+        }
+    }
+    public static void addInvoice(Connection conn, int orderId, BigDecimal totalAmount, String issueDate) throws SQLException {
+        String query = "INSERT INTO invoices (order_id, total_amount, issue_date) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, orderId);
+            stmt.setBigDecimal(2, totalAmount);
+            stmt.setString(3, issueDate);
+            stmt.executeUpdate();
+            System.out.println("Invoice added successfully for Order ID: " + orderId);
+        }
+    }
+
 }
 
