@@ -200,7 +200,7 @@ public class ShopApp {
             }
         }
     }
-    public static void searchProductsByKeywords(String keywords) {
+    public static void searchProductsByKeywords(String keywords, String operator) {
         // 检查是否有输入关键词
         if (keywords == null || keywords.trim().isEmpty()) {
             System.out.println("Please provide valid keywords.");
@@ -210,9 +210,19 @@ public class ShopApp {
         String[] keywordArray = keywords.trim().split("\\s+"); // 按空格拆分为数组，忽略多余的空格
         StringBuilder queryBuilder = new StringBuilder("SELECT * FROM products WHERE ");
 
-        // 动态生成 SQL 查询条件
-        String conditions = String.join(" OR ", Collections.nCopies(keywordArray.length, "(name LIKE ? OR description LIKE ?)"));
-        queryBuilder.append(conditions);
+        // 默认逻辑运算符是OR，如果传入的是AND，则使用AND
+        if (operator == null || operator.equalsIgnoreCase("OR")) {
+            // 使用OR运算符
+            String conditions = String.join(" OR ", Collections.nCopies(keywordArray.length, "(name LIKE ? OR description LIKE ?)"));
+            queryBuilder.append(conditions);
+        } else if (operator.equalsIgnoreCase("AND")) {
+            // 使用AND运算符
+            String conditions = String.join(" AND ", Collections.nCopies(keywordArray.length, "(name LIKE ? AND description LIKE ?)"));
+            queryBuilder.append(conditions);
+        } else {
+            System.out.println("Unsupported operator. Please use 'AND' or 'OR'.");
+            return;
+        }
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(queryBuilder.toString())) {
@@ -384,6 +394,59 @@ public class ShopApp {
             System.out.println("Invoice added successfully for Order ID: " + orderId);
         }
     }
-
+    public static void updateInvoice(Connection conn, int invoiceId, BigDecimal newTotalAmount, String newIssueDate) throws SQLException {
+        String query = "UPDATE invoices SET total_amount = ?, issue_date = ? WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setBigDecimal(1, newTotalAmount);
+            stmt.setString(2, newIssueDate);
+            stmt.setInt(3, invoiceId);
+            int rowsAffected = stmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                System.out.println("Invoice with ID " + invoiceId + " updated successfully.");
+            } else {
+                System.out.println("No invoice found with ID " + invoiceId);
+            }
+        }
+    }
+    public static void deleteInvoice(Connection conn, int invoiceId) throws SQLException {
+        String query = "DELETE FROM invoices WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, invoiceId);
+            int rowsAffected = stmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                System.out.println("Invoice with ID " + invoiceId + " deleted successfully.");
+            } else {
+                System.out.println("No invoice found with ID " + invoiceId);
+            }
+        }
+    }
+    public static void getInvoiceById(Connection conn, int invoiceId) throws SQLException {
+        String query = "SELECT * FROM invoices WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, invoiceId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    System.out.println("Invoice ID: " + rs.getInt("id"));
+                    System.out.println("Order ID: " + rs.getInt("order_id"));
+                    System.out.println("Total Amount: " + rs.getBigDecimal("total_amount"));
+                    System.out.println("Issue Date: " + rs.getString("issue_date"));
+                } else {
+                    System.out.println("Invoice with ID " + invoiceId + " not found.");
+                }
+            }
+        }
+    }
+    
 }
+
+
+
+
+
+
+
+
+
 
