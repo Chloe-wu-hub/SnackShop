@@ -11,11 +11,11 @@ import java.util.Collections;
 
 public class ShopApp {
     public static void main(String[] args) {
-        try (Connection conn = DatabaseConnection.getConnection()) {
-            if (conn != null) {
-                conn.setAutoCommit(true); // 确保自动提交
-                String query = "INSERT INTO products (name, price, quantity, country_of_origin, weight_g, flavor, category) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                PreparedStatement stmt = conn.prepareStatement(query);
+    	try (Connection conn = DatabaseConnection.getConnection()) {
+    	    if (conn != null) {
+    	        conn.setAutoCommit(false);  // 禁用自动提交
+    	        String query = "INSERT INTO products (name, price, quantity, country_of_origin, weight_g, flavor, category) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    	        PreparedStatement stmt = conn.prepareStatement(query);
 
                 // Adding data from the provided table (20 unique products)
                 addProduct(stmt, "Pocky", new BigDecimal("1.50"), 100, "Japan", new BigDecimal("50"), "Chocolate", "Biscuit Sticks");
@@ -41,11 +41,11 @@ public class ShopApp {
 
                 // Execute batch insert
                 stmt.executeBatch();
+                conn.commit();  // 显式提交事务
                 System.out.println("Products added successfully.");
                 // Example usage: Update product with ID 1 to have a new quantity of 5
                 updateProduct(conn, 1, 5);
-                // Example usage: Delete product with ID 2
-                deleteProduct(conn, 2);
+
                 // Example usage: Get product by ID
                 getProductById(conn, 1);
                 
