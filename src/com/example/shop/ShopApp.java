@@ -116,7 +116,8 @@ public class ShopApp {
     }
  // 显示所有产品的方法
     private static void showProducts(Connection conn) throws SQLException {
-        String query = "SELECT * FROM products";
+    	// 查询产品，限制 id 在 1 到 20 之间
+        String query = "SELECT * FROM products WHERE id BETWEEN 1 AND 20";
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             boolean hasProducts = false;  // 增加检查是否有产品

@@ -27,85 +27,158 @@ public class Customer {
     public void saveToDatabase() {
         String query = "INSERT INTO customers (customer_id, name, address, phone, email, order_history, payment_info) " +
                        "VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+        
+        // 数据验证
+        if (this.customerID == null || this.customerID.isEmpty()) {
+            System.out.println("Customer ID cannot be null or empty.");
+            return;
+        }
+        if (!this.email.contains("@")) {
+            System.out.println("Invalid email format.");
+            return;
+        }
+        
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            if (conn != null) {
+                System.out.println("Database connection established.");
+                conn.setAutoCommit(false);  // 禁用自动提交
 
-            // Debugging: Print out the values being inserted
-            System.out.println("Inserting customer: " + this.customerID);
+                try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(1, this.customerID);
+                    stmt.setString(2, this.name);
+                    stmt.setString(3, this.address);
+                    stmt.setString(4, this.phone);
+                    stmt.setString(5, this.email);
+                    stmt.setString(6, String.join(", ", this.orderHistory));  // 用逗号分隔
+                    stmt.setString(7, String.join(", ", this.paymentInfo));  // 用逗号分隔
 
-            stmt.setString(1, this.customerID);
-            stmt.setString(2, this.name);
-            stmt.setString(3, this.address);
-            stmt.setString(4, this.phone);
-            stmt.setString(5, this.email);
-            stmt.setString(6, String.join("<br>", this.orderHistory));  // 将orderHistory转换为String
-            stmt.setString(7, String.join("<br>", this.paymentInfo));  // 将paymentInfo转换为String
+                    int rowsAffected = stmt.executeUpdate();
+                    conn.commit();
 
-            int rowsAffected = stmt.executeUpdate();
-
-            // Debugging: Confirm the number of rows affected
-            if (rowsAffected > 0) {
-                System.out.println("Customer " + this.customerID + " inserted successfully.");
+                    if (rowsAffected > 0) {
+                        System.out.println("Customer " + this.customerID + " inserted successfully.");
+                    } else {
+                        System.out.println("Failed to insert customer: " + this.customerID);
+                    }
+                } catch (SQLException e) {
+                    conn.rollback();  // 回滚事务
+                    System.out.println("Error inserting customer with ID: " + this.customerID);
+                    e.printStackTrace();
+                }
             } else {
-                System.out.println("Failed to insert customer: " + this.customerID);
+                System.out.println("Failed to connect to the database.");
             }
         } catch (SQLException e) {
+            System.out.println("Error with database connection.");
             e.printStackTrace();
         }
     }
 
     // 插入多个客户数据
     public static void insertMultipleCustomers() {
-        Customer customer1 = new Customer("1234578", "Pierre Dupont", "5 Rue de la Paix, 75002 Paris, France", "+33 1 44 55 66 77", "pierre.dupont@email.com");
-        customer1.orderHistory.add("订单ID: 1001 (Delivered, 150.00 EUR, 2024-12-01)");
-        customer1.orderHistory.add("订单ID: 1002 (In Progress, 230.50 EUR, 2024-12-05)");
-        customer1.paymentInfo.add("支付ID: 2001 (Credit Card, Completed, 150.00 EUR)");
-        customer1.paymentInfo.add("支付ID: 2002 (PayPal, Pending, 230.50 EUR)");
-        customer1.saveToDatabase();
+        // 使用您提供的客户数据
+        String[][] customerData = {
+            {"1234578", "Pierre Dupont", "5 Rue de la Paix, 75002 Paris, France", "+33 1 44 55 66 77", "pierre.dupont@email.com", "1001: Delivered, 1002: In Progress", "150.00 EUR, 230.50 EUR"},
+            {"1234579", "Marie Lefevre", "15 Avenue des Champs-Élysées, 75008 Paris, France", "+33 1 45 67 89 01", "marie.lefevre@email.com", "1003: Delivered", "320.00 EUR"},
+            {"1234580", "Jean-Marie Durand", "32 Boulevard Montmartre, 75009 Paris, France", "+33 1 47 56 78 99", "jean.durand@email.com", "1004: Delivered", "180.00 EUR"},
+            {"1234581", "Sophie Martin", "10 Rue de Rivoli, 75001 Paris, France", "+33 1 48 59 60 10", "sophie.martin@email.com", "1005: Delivered", "99.99 EUR"},
+            {"1234582", "Alain Bernard", "20 Rue des Rosiers, 75004 Paris, France", "+33 1 49 51 52 53", "alain.bernard@email.com", "1006: In Progress", "210.00 EUR"},
+            {"1234583", "Claire Lemoine", "18 Rue du Faubourg Saint-Antoine, 75011 Paris, France", "+33 1 50 52 53 54", "claire.lemoine@email.com", "1007: Delivered", "220.50 EUR"},
+            {"1234584", "Jacques Dubois", "7 Place de la République, 75003 Paris, France", "+33 1 52 53 54 55", "jacques.dubois@email.com", "1008: Delivered", "180.00 EUR"},
+            {"1234585", "Emilie Boucher", "4 Rue des Martyrs, 75009 Paris, France", "+33 1 58 60 61 62", "emilie.boucher@email.com", "1009: In Progress", "145.00 EUR"},
+            {"1234586", "Nicolas Pires", "22 Rue Saint-Denis, 75001 Paris, France", "+33 1 63 64 65 66", "nicolas.pires@email.com", "1010: Delivered", "250.00 EUR"},
+            {"1234587", "Isabelle Lefranc", "13 Rue de la Gare, 75008 Paris, France", "+33 1 72 73 74 75", "isabelle.lefranc@email.com", "1011: Delivered", "175.50 EUR"}
+        };
 
-        Customer customer2 = new Customer("1234579", "Marie Lefevre", "15 Avenue des Champs-Élysées, 75008 Paris, France", "+33 1 45 67 89 01", "marie.lefevre@email.com");
-        customer2.orderHistory.add("订单ID: 1003 (Delivered, 320.00 EUR, 2024-12-03)");
-        customer2.paymentInfo.add("支付ID: 2003 (Bank Transfer, Completed, 320.00 EUR)");
-        customer2.saveToDatabase();
+        // 遍历每个客户信息并插入数据库
+        for (String[] customerInfo : customerData) {
+            String customerID = customerInfo[0];
+            String name = customerInfo[1];
+            String address = customerInfo[2];
+            String phone = customerInfo[3];
+            String email = customerInfo[4];
+            String orderHistory = customerInfo[5];
+            String paymentInfo = customerInfo[6];
 
-        Customer customer3 = new Customer("1234580", "Jean-Marie Durand", "32 Boulevard Montmartre, 75009 Paris, France", "+33 1 47 56 78 99", "jean.durand@email.com");
-        customer3.orderHistory.add("订单ID: 1004 (Delivered, 180.00 EUR, 2024-12-02)");
-        customer3.paymentInfo.add("支付ID: 2024 (Credit Card, Completed, 180.00 EUR)");
-        customer3.saveToDatabase();
+            Customer customer = new Customer(customerID, name, address, phone, email);
+            customer.orderHistory.add(orderHistory);  // 设置订单历史
+            customer.paymentInfo.add(paymentInfo);    // 设置支付信息
 
-        Customer customer4 = new Customer("1234581", "Sophie Martin", "10 Rue de Rivoli, 75001 Paris, France", "+33 1 48 59 60 10", "sophie.martin@email.com");
-        customer4.orderHistory.add("订单ID: 1005 (Delivered, 99.99 EUR, 2024-12-04)");
-        customer4.paymentInfo.add("支付ID: 2024 (Credit Card, Completed, 99.99 EUR)");
-        customer4.saveToDatabase();
+            customer.saveToDatabase();  // 保存客户信息到数据库
+        }
+    }
 
-        Customer customer5 = new Customer("1234582", "Alain Bernard", "20 Rue des Rosiers, 75004 Paris, France", "+33 1 49 51 52 53", "alain.bernard@email.com");
-        customer5.orderHistory.add("订单ID: 1006 (In Progress, 210.00 EUR, 2024-12-06)");
-        customer5.paymentInfo.add("支付ID: 2024 (PayPal, Pending, 210.00 EUR)");
-        customer5.saveToDatabase();
+    // 添加 main 方法来调用插入多个客户数据的功能
+    public static void main(String[] args) {
+        // 插入具体的客户数据
+        insertMultipleCustomers();
+    }
+ // 更新客户信息到数据库
+    public void updateCustomerInformation(String name, String address, String phone, String email, ArrayList<String> orderHistory, ArrayList<String> paymentInfo) {
+        String query = "UPDATE customers SET name = ?, address = ?, phone = ?, email = ?, order_history = ?, payment_info = ? WHERE customer_id = ?";
 
-        Customer customer6 = new Customer("1234583", "Claire Lemoine", "18 Rue du Faubourg Saint-Antoine, 75011 Paris, France", "+33 1 50 52 53 54", "claire.lemoine@email.com");
-        customer6.orderHistory.add("订单ID: 1007 (Delivered, 220.50 EUR, 2024-12-07)");
-        customer6.paymentInfo.add("支付ID: 2024 (PayPal, Completed, 220.50 EUR)");
-        customer6.saveToDatabase();
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            if (conn != null) {
+                System.out.println("Database connection established.");
+                conn.setAutoCommit(false);  // 禁用自动提交
 
-        Customer customer7 = new Customer("1234584", "Jacques Dubois", "7 Place de la République, 75003 Paris, France", "+33 1 52 53 54 55", "jacques.dubois@email.com");
-        customer7.orderHistory.add("订单ID: 1008 (Delivered, 180.00 EUR, 2024-12-08)");
-        customer7.paymentInfo.add("支付ID: 2024 (Bank Transfer, Completed, 180.00 EUR)");
-        customer7.saveToDatabase();
+                try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(1, name);
+                    stmt.setString(2, address);
+                    stmt.setString(3, phone);
+                    stmt.setString(4, email);
+                    stmt.setString(5, String.join(", ", orderHistory));  // 用逗号分隔订单历史
+                    stmt.setString(6, String.join(", ", paymentInfo));  // 用逗号分隔支付信息
+                    stmt.setString(7, this.customerID);  // 使用当前对象的 customerID
 
-        Customer customer8 = new Customer("1234585", "Emilie Boucher", "4 Rue des Martyrs, 75009 Paris, France", "+33 1 58 60 61 62", "emilie.boucher@email.com");
-        customer8.orderHistory.add("订单ID: 1009 (In Progress, 145.00 EUR, 2024-12-09)");
-        customer8.paymentInfo.add("支付ID: 2024 (PayPal, Pending, 145.00 EUR)");
-        customer8.saveToDatabase();
+                    int rowsAffected = stmt.executeUpdate();
+                    if (rowsAffected > 0) {
+                        conn.commit();  // 提交事务
+                        System.out.println("Customer " + this.customerID + " updated successfully.");
+                    } else {
+                        conn.rollback();  // 回滚事务
+                        System.out.println("No customer found with ID: " + this.customerID);
+                    }
+                } catch (SQLException e) {
+                    conn.rollback();  // 回滚事务
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("Failed to connect to the database.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+ // 删除客户信息
+    public void deleteFromDatabase() {
+        String query = "DELETE FROM customers WHERE customer_id = ?";
 
-        Customer customer9 = new Customer("1234586", "Nicolas Pires", "22 Rue Saint-Denis, 75001 Paris, France", "+33 1 63 64 65 66", "nicolas.pires@email.com");
-        customer9.orderHistory.add("订单ID: 1010 (Delivered, 250.00 EUR, 2024-12-10)");
-        customer9.paymentInfo.add("支付ID: 2024 (Credit Card, Completed, 250.00 EUR)");
-        customer9.saveToDatabase();
+        try (Connection conn = DatabaseConnection.getConnection()) {
+            if (conn != null) {
+                System.out.println("Database connection established.");
+                conn.setAutoCommit(false);  // 禁用自动提交
 
-        Customer customer10 = new Customer("1234587", "Isabelle Lefranc", "13 Rue de la Gare, 75008 Paris, France", "+33 1 72 73 74 75", "isabelle.lefranc@email.com");
-        customer10.orderHistory.add("订单ID: 1011 (Delivered, 175.50 EUR, 2024-12-11)");
-        customer10.paymentInfo.add("支付ID: 2024 (PayPal, Completed, 175.50 EUR)");
-        customer10.saveToDatabase();
+                try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                    stmt.setString(1, this.customerID);  // 使用当前对象的 customerID
+
+                    int rowsAffected = stmt.executeUpdate();
+                    if (rowsAffected > 0) {
+                        conn.commit();  // 提交事务
+                        System.out.println("Customer " + this.customerID + " deleted successfully.");
+                    } else {
+                        conn.rollback();  // 回滚事务
+                        System.out.println("No customer found with ID: " + this.customerID);
+                    }
+                } catch (SQLException e) {
+                    conn.rollback();  // 回滚事务
+                    e.printStackTrace();
+                }
+            } else {
+                System.out.println("Failed to connect to the database.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
