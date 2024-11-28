@@ -78,7 +78,7 @@ public class Customer {
     public static void insertMultipleCustomers() {
         // 使用您提供的客户数据
         String[][] customerData = {
-            {"1234578", "Pierre Dupont", "5 Rue de la Paix, 75002 Paris, France", "+33 1 44 55 66 77", "pierre.dupont@email.com", "1001: Delivered, 1002: In Progress", "150.00 EUR, 230.50 EUR"},
+            {"1234578", "Pierre Dupont", "5 Rue de la Paix, 75002 Paris, France", "+33 1 44 55 66 77", "pierre.dupont@email.com", "1001: In Progress", "230.50 EUR"},
             {"1234579", "Marie Lefevre", "15 Avenue des Champs-Élysées, 75008 Paris, France", "+33 1 45 67 89 01", "marie.lefevre@email.com", "1003: Delivered", "320.00 EUR"},
             {"1234580", "Jean-Marie Durand", "32 Boulevard Montmartre, 75009 Paris, France", "+33 1 47 56 78 99", "jean.durand@email.com", "1004: Delivered", "180.00 EUR"},
             {"1234581", "Sophie Martin", "10 Rue de Rivoli, 75001 Paris, France", "+33 1 48 59 60 10", "sophie.martin@email.com", "1005: Delivered", "99.99 EUR"},
