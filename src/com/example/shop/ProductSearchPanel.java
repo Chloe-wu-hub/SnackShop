@@ -41,7 +41,7 @@ public class ProductSearchPanel extends JPanel {
 
  // 查询商品信息的方法
     private void searchProductById(String productId) {
-        String query = "SELECT * FROM products WHERE id = ?";  // 修改字段名为 id
+        String query = "SELECT * FROM products WHERE id = ?";
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -51,19 +51,27 @@ public class ProductSearchPanel extends JPanel {
 
             if (rs.next()) {
                 // 从结果集获取商品信息
-                String id = rs.getString("id");  // 获取商品ID
+                String id = rs.getString("id");
                 String name = rs.getString("name");
                 double price = rs.getDouble("price");
                 int quantity = rs.getInt("quantity");
-                
-                // 这里是你想要显示的字段
+                String category = rs.getString("category");
+                String countryOfOrigin = rs.getString("country_of_origin");
+                int weightG = rs.getInt("weight_g");
+                String flavor = rs.getString("flavor");
+
+                // 构建显示内容
                 StringBuilder resultText = new StringBuilder("<html>");
                 resultText.append("<b>ID:</b> ").append(id).append("<br>");
                 resultText.append("<b>Name:</b> ").append(name).append("<br>");
                 resultText.append("<b>Price:</b> ").append(price).append(" EUR<br>");
                 resultText.append("<b>Quantity:</b> ").append(quantity).append("<br>");
+                resultText.append("<b>Category:</b> ").append(category).append("<br>");
+                resultText.append("<b>Country of Origin:</b> ").append(countryOfOrigin).append("<br>");
+                resultText.append("<b>Weight (g):</b> ").append(weightG).append("<br>");
+                resultText.append("<b>Flavor:</b> ").append(flavor).append("<br>");
                 resultText.append("</html>");
-                
+
                 // 显示商品信息
                 resultLabel.setText(resultText.toString());
             } else {
