@@ -16,30 +16,31 @@ public class ShopApp {
     	try (Connection conn = DatabaseConnection.getConnection()) {
     	    if (conn != null) {
     	        conn.setAutoCommit(false);  // 禁用自动提交
-    	        String query = "INSERT INTO products (name, price, quantity, country_of_origin, weight_g, flavor, category) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    	        String query = "INSERT INTO products (name, price, quantity, country_of_origin, weight_g, flavor, category, imagepath) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     	        PreparedStatement stmt = conn.prepareStatement(query);
 
+    	        // Adding data from the provided table
                 // Adding data from the provided table (20 unique products)
-                addProduct(stmt, "Pocky", new BigDecimal("1.50"), 100, "Japan", new BigDecimal("50"), "Chocolate", "Biscuit Sticks");
-                addProduct(stmt, "Stroopwafel", new BigDecimal("2.00"), 200, "Netherlands", new BigDecimal("60"), "Caramel", "Waffle Cookies");
-                addProduct(stmt, "Kinder Bueno", new BigDecimal("1.80"), 150, "Italy", new BigDecimal("43"), "Hazelnut", "Chocolate Bar");
-                addProduct(stmt, "Tim Tam", new BigDecimal("2.20"), 300, "Australia", new BigDecimal("45"), "Chocolate", "Biscuits");
-                addProduct(stmt, "Reese's Peanut Butter Cups", new BigDecimal("1.00"), 250, "USA", new BigDecimal("40"), "Peanut Butter", "Chocolate");
-                addProduct(stmt, "Choco Pie", new BigDecimal("1.30"), 180, "South Korea", new BigDecimal("35"), "Marshmallow", "Cake");
-                addProduct(stmt, "Digestive Biscuits", new BigDecimal("1.00"), 120, "United Kingdom", new BigDecimal("70"), "Whole Wheat", "Biscuits");
-                addProduct(stmt, "Tunnock's Caramel Wafer", new BigDecimal("1.20"), 140, "Scotland", new BigDecimal("55"), "Caramel", "Wafers");
-                addProduct(stmt, "Macaron", new BigDecimal("3.00"), 80, "France", new BigDecimal("15"), "Various", "Pastry");
-                addProduct(stmt, "Haw Flakes", new BigDecimal("0.50"), 90, "China", new BigDecimal("30"), "Sweet & Sour", "Fruit Candy");
-                addProduct(stmt, "Baklava", new BigDecimal("2.50"), 70, "Turkey", new BigDecimal("35"), "Honey & Nuts", "Pastry");
-                addProduct(stmt, "Bounty Bar", new BigDecimal("1.50"), 110, "UK", new BigDecimal("57"), "Coconut", "Chocolate Bar");
-                addProduct(stmt, "Mochi", new BigDecimal("2.00"), 95, "Japan", new BigDecimal("45"), "Red Bean", "Rice Cake");
-                addProduct(stmt, "Lotus Biscoff", new BigDecimal("0.70"), 130, "Belgium", new BigDecimal("25"), "Cinnamon", "Biscuits");
-                addProduct(stmt, "Ritter Sport", new BigDecimal("2.20"), 160, "Germany", new BigDecimal("100"), "Hazelnut", "Chocolate");
-                addProduct(stmt, "Alfajores", new BigDecimal("2.00"), 85, "Argentina", new BigDecimal("60"), "Dulce de Leche", "Cookies");
-                addProduct(stmt, "Jelly Babies", new BigDecimal("1.00"), 150, "United Kingdom", new BigDecimal("80"), "Fruit", "Gummies");
-                addProduct(stmt, "Salted Egg Yolk Chips", new BigDecimal("3.50"), 50, "Singapore", new BigDecimal("100"), "Salted Egg Yolk", "Chips");
-                addProduct(stmt, "Speculoos Cookie Butter", new BigDecimal("3.00"), 75, "Belgium", new BigDecimal("200"), "Spiced", "Spread");
-                addProduct(stmt, "Churros", new BigDecimal("1.80"), 60, "Spain", new BigDecimal("50"), "Cinnamon & Sugar", "Pastry");
+                addProduct(stmt, "Pocky", new BigDecimal("1.50"), 100, "Japan", new BigDecimal("50"), "Chocolate", "Biscuit","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Stroopwafel", new BigDecimal("2.00"), 200, "Netherlands", new BigDecimal("60"), "Caramel", "Cookies","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Kinder Bueno", new BigDecimal("1.80"), 150, "Italy", new BigDecimal("43"), "Hazelnut", "Chocolate","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Tim Tam", new BigDecimal("2.20"), 300, "Australia", new BigDecimal("45"), "Chocolate", "Biscuits","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Reese's Peanut Butter Cups", new BigDecimal("1.00"), 250, "USA", new BigDecimal("40"), "Peanut Butter", "Chocolate","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Choco Pie", new BigDecimal("1.30"), 180, "South Korea", new BigDecimal("35"), "Marshmallow", "Cake","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Digestive Biscuits", new BigDecimal("1.00"), 120, "United Kingdom", new BigDecimal("70"), "Whole Wheat", "Biscuits","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Tunnock's Caramel Wafer", new BigDecimal("1.20"), 140, "Scotland", new BigDecimal("55"), "Caramel", "Wafers","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Macaron", new BigDecimal("3.00"), 80, "France", new BigDecimal("15"), "Various", "Pastry","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Haw Flakes", new BigDecimal("0.50"), 90, "China", new BigDecimal("30"), "Sweet & Sour", "Fruit Candy","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Baklava", new BigDecimal("2.50"), 70, "Turkey", new BigDecimal("35"), "Honey & Nuts", "Pastry","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Bounty Bar", new BigDecimal("1.50"), 110, "UK", new BigDecimal("57"), "Coconut", "Chocolate","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Mochi", new BigDecimal("2.00"), 95, "Japan", new BigDecimal("45"), "Red Bean", "Cake","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Lotus Biscoff", new BigDecimal("0.70"), 130, "Belgium", new BigDecimal("25"), "Cinnamon", "Biscuits","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Ritter Sport", new BigDecimal("2.20"), 160, "Germany", new BigDecimal("100"), "Hazelnut", "Chocolate","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Alfajores", new BigDecimal("2.00"), 85, "Argentina", new BigDecimal("60"), "Dulce de Leche", "Cookies","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Jelly Babies", new BigDecimal("1.00"), 150, "United Kingdom", new BigDecimal("80"), "Fruit", "Gummies","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Salted Egg Yolk Chips", new BigDecimal("3.50"), 50, "Singapore", new BigDecimal("100"), "Salted Egg Yolk", "Chips","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Speculoos Cookie Butter", new BigDecimal("3.00"), 75, "Belgium", new BigDecimal("200"), "Spiced", "Spread","/Users/wumingge/Desktop/Product images");
+                addProduct(stmt, "Churros", new BigDecimal("1.80"), 60, "Spain", new BigDecimal("50"), "Cinnamon & Sugar", "Pastry","/Users/wumingge/Desktop/Product images");
 
                 // Execute batch insert
                 stmt.executeBatch();
@@ -63,7 +64,7 @@ public class ShopApp {
         }
     }
  // 确保 addProduct 方法独立于 main 方法，并且放在类的同一级别
-    private static void addProduct(PreparedStatement stmt, String name, BigDecimal price, int quantity, String countryOfOrigin, BigDecimal weight, String flavor, String category) throws SQLException {
+    private static void addProduct(PreparedStatement stmt, String name, BigDecimal price, int quantity, String countryOfOrigin, BigDecimal weight, String flavor, String category, String imagepath) throws SQLException {
         System.out.println("Attempting to add product: " + name);  // 打印正在添加的商品名称
         stmt.setString(1, name);
         stmt.setBigDecimal(2, price);
@@ -72,7 +73,9 @@ public class ShopApp {
         stmt.setBigDecimal(5, weight);
         stmt.setString(6, flavor);
         stmt.setString(7, category);
-        stmt.addBatch();
+		stmt.setString(8, imagepath);
+		stmt.addBatch();
+		
         System.out.println("Product added to batch: " + name);  // 打印已加入批量操作
     }
 
@@ -306,11 +309,23 @@ public class ShopApp {
                         itemStmt.executeUpdate();
                     }
                 }
+                // 创建发票
+                generateInvoice(conn, orderId);
 
+                // 提交事务
+                conn.commit();
+                System.out.println("Order created successfully with Order ID: " + orderId);
+                System.out.println("Invoice generated successfully for Order ID: " + orderId);
                 System.out.println("Order created successfully with Order ID: " + orderId);
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            try {
+                conn.rollback();
+                System.out.println("Transaction rolled back due to error.");
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+             }
         }
     }
     public static void updateOrderStatus(Connection conn, int orderId, String newStatus) {
@@ -364,7 +379,7 @@ public class ShopApp {
                         totalAmount = rs.getBigDecimal("total_price");
                     } else {
                         System.out.println("Order ID " + orderId + " not found.");
-                        return;
+                        return;  // 如果找不到订单，结束方法
                     }
                 }
             }
